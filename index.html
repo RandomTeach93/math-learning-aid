@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kit iSparkle Digital</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            padding: 20px;
+        }
+        h2 {
+            color: #4b0082;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            background-color: #9370db;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background-color: #8a2be2;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+        .counting-set {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            background: linear-gradient(145deg, #6a5acd, #9370db);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 900px;
+        }
+        .keys {
+            display: flex;
+            gap: 5px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+        .key {
+            width: 50px;
+            height: 100px;
+            background: #FFD700;
+            border: 2px solid #daa520;
+            text-align: center;
+            line-height: 100px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s;
+            position: relative;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .key:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .key.active {
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+        }
+        .key.completed {
+            background: #32CD32;
+            color: white;
+        }
+        .key.answered {
+            background: #1E90FF;
+            color: white;
+        }
+        .total {
+            font-size: 24px;
+            color: white;
+            margin-left: 20px;
+            min-width: 120px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        .dice-container {
+            margin: 20px auto;
+            padding: 15px;
+            background: linear-gradient(145deg, #6a5acd, #9370db);
+            border-radius: 15px;
+            display: none;
+            max-width: 300px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .dice {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            color: #4b0082;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px;
+            line-height: 60px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .operation-buttons {
+            margin: 10px;
+        }
+        .operation-btn {
+            font-size: 24px;
+            padding: 5px 15px;
+            margin: 0 5px;
+            background-color: #4b0082;
+        }
+        .operation-btn.active {
+            background-color: #8a2be2;
+            transform: scale(1.1);
+        }
+        .current-problem {
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .game-progress {
+            font-size: 18px;
+            color: white;
+            margin: 10px 0;
+        }
+        .instructions {
+            background-color: #e6e6fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 800px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 768px) {
+            .counting-set {
+                flex-direction: column;
+            }
+            .total {
+                margin-left: 0;
+                margin-top: 15px;
+            }
+            .key {
+                width: 40px;
+                height: 80px;
+                line-height: 80px;
+                font-size: 18px;
+            }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <h2>Kit iSparkle Digital - Interactive Math Learning</h2>
+    
+    <div class="instructions">
+        <p><strong>How to use:</strong> Click on number keys to add or subtract. Change operation mode with the buttons above.</p>
+        <p>In Game Mode, each set can choose to add or subtract independently. All sets must answer before new numbers roll!</p>
+    </div>
+    
+    <div class="controls">
+        <button onclick="setOperation('+')" id="addBtn">Addition (+)</button>
+        <button onclick="setOperation('-')" id="subBtn">Subtraction (-)</button>
+        <button onclick="revealTotal()">Show Answer</button>
+        <button onclick="addNewSet()">Add Another Set</button>
+        <button onclick="removeSet()">Remove Last Set</button>
+        <button onclick="toggleGameMode()" id="gameModeBtn">Game Mode: OFF</button>
+        <button onclick="rollDice()" id="rollDiceButton" style="display:none;">Roll Dice</button>
+        <button onclick="resetAllKeys()">Reset All Keys</button>
+    </div>
+    
+    <div id="sets-container"></div>
+    
+    <div class="dice-container" id="diceContainer">
+        <div class="current-problem" id="currentProblem"></div>
+        <div>
+            <div class="dice" id="dice1">?</div>
+            <div class="dice" id="dice2">?</div>
+        </div>
+        <div class="game-progress" id="gameProgress">Completed: 0/10</div>
+    </div>
+    
+    <script>
+        let operation = '+';
+        let currentColor = "#FFA500"; 
+        let groupColorIndex = 0;
+        const colors = ["#FFA500", "#FF4500", "#1E90FF", "#32CD32", "#9370DB", "#FF69B4"];
+        let setCount = 1;
+        let gameMode = false;
+        let completedNumbers = [];
+        let dice1Value = 0;
+        let dice2Value = 0;
+        let currentProblemAnswers = {};
+        let currentProblemValue = null;
+
+        function setOperation(op) {
+            operation = op;
+            groupColorIndex = (groupColorIndex + 1) % colors.length;
+            currentColor = colors[groupColorIndex];
+            
+            document.getElementById('addBtn').style.backgroundColor = op === '+' ? '#8a2be2' : '#9370db';
+            document.getElementById('subBtn').style.backgroundColor = op === '-' ? '#8a2be2' : '#9370db';
+            
+            document.querySelectorAll('.key[data-active="true"]').forEach(key => {
+                key.style.boxShadow = op === '+' ? 'inset 0 0 10px rgba(0,0,0,0.3)' : 'inset 0 0 10px rgba(255,0,0,0.5)';
+            });
+        }
+
+        function revealTotal() {
+            document.querySelectorAll(".total").forEach(total => {
+                total.style.visibility = "visible";
+            });
+        }
+
+        function addNewSet() {
+            const newSetId = `set${setCount + 1}`;
+            setCount++;
+            createCountingSet(newSetId);
+        }
+
+        function removeSet() {
+            if (setCount > 1) {
+                const lastSet = document.querySelector(`#set${setCount}`);
+                lastSet.remove();
+                setCount--;
+            }
+        }
+
+        function toggleGameMode() {
+            gameMode = !gameMode;
+            document.getElementById("diceContainer").style.display = gameMode ? "block" : "none";
+            document.getElementById("rollDiceButton").style.display = gameMode ? "inline-block" : "none";
+            document.getElementById("gameModeBtn").textContent = `Game Mode: ${gameMode ? 'ON' : 'OFF'}`;
+            
+            if (gameMode) {
+                completedNumbers = [];
+                currentProblemAnswers = {};
+                updateGameProgress();
+                // Add operation buttons to existing sets
+                document.querySelectorAll('.counting-set').forEach(set => {
+                    if (!set.querySelector('.operation-buttons')) {
+                        const operationButtons = document.createElement("div");
+                        operationButtons.classList.add("operation-buttons");
+                        operationButtons.innerHTML = `
+                            <button class="operation-btn active" data-operation="+">+</button>
+                            <button class="operation-btn" data-operation="-">-</button>
+                        `;
+                        set.insertBefore(operationButtons, set.querySelector('.keys'));
+                        
+                        operationButtons.querySelectorAll('.operation-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                operationButtons.querySelectorAll('.operation-btn').forEach(b => b.classList.remove('active'));
+                                this.classList.add('active');
+                            });
+                        });
+                    }
+                });
+                rollDice();
+            } else {
+                // Remove operation buttons when exiting game mode
+                document.querySelectorAll('.operation-buttons').forEach(btn => btn.remove());
+                resetAllKeys();
+            }
+        }
+
+        function rollDice() {
+            const dice1 = document.getElementById("dice1");
+            const dice2 = document.getElementById("dice2");
+
+            // Reset problem tracking
+            currentProblemAnswers = {};
+            document.querySelectorAll('.key.answered').forEach(key => {
+                key.classList.remove('answered');
+            });
+            document.getElementById("currentProblem").textContent = "";
+
+            // Animate dice roll
+            dice1.textContent = "?";
+            dice2.textContent = "?";
+            
+            setTimeout(() => {
+                dice1Value = Math.floor(Math.random() * 6) + 1;
+                dice2Value = Math.floor(Math.random() * 6) + 1;
+                
+                dice1.textContent = dice1Value;
+                dice2.textContent = dice2Value;
+                
+                currentProblemValue = null;
+            }, 300);
+        }
+
+        function resetAllKeys() {
+            const allKeys = document.querySelectorAll('.key');
+            allKeys.forEach(key => {
+                key.style.background = "#FFD700";
+                key.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
+                key.classList.remove('completed', 'answered');
+                key.dataset.active = "false";
+                key.dataset.position = "0";
+                key.style.transform = "translateY(0)";
+                key.dataset.group = "-1";
+            });
+
+            document.querySelectorAll(".total").forEach(total => {
+                total.style.visibility = "hidden";
+                total.querySelector('span').innerText = '0';
+            });
+
+            if (gameMode) {
+                completedNumbers = [];
+                currentProblemAnswers = {};
+                updateGameProgress();
+                rollDice();
+            }
+        }
+
+        function createCountingSet(setId) {
+            const setsContainer = document.getElementById("sets-container");
+            
+            const countingSet = document.createElement("div");
+            countingSet.classList.add("counting-set");
+            countingSet.id = setId;
+            countingSet.style.background = `linear-gradient(145deg, ${colors[(setCount-1) % colors.length]}, ${colors[(setCount) % colors.length]})`;
+            
+            // Add operation buttons in game mode
+            if (gameMode) {
+                const operationButtons = document.createElement("div");
+                operationButtons.classList.add("operation-buttons");
+                operationButtons.innerHTML = `
+                    <button class="operation-btn active" data-operation="+">+</button>
+                    <button class="operation-btn" data-operation="-">-</button>
+                `;
+                countingSet.appendChild(operationButtons);
+                
+                operationButtons.querySelectorAll('.operation-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        operationButtons.querySelectorAll('.operation-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                });
+            }
+            
+            const keysContainer = document.createElement("div");
+            keysContainer.classList.add("keys");
+            
+            const totalContainer = document.createElement("div");
+            totalContainer.classList.add("total");
+            totalContainer.innerHTML = `Total: <span id="total${setId}">0</span>`;
+            
+            countingSet.appendChild(keysContainer);
+            countingSet.appendChild(totalContainer);
+            setsContainer.appendChild(countingSet);
+            
+            createKeys(setId);
+        }
+
+        function createKeys(setId) {
+            const keysContainer = document.querySelector(`#${setId} .keys`);
+            const totalDisplay = document.getElementById(`total${setId}`);
+            let count = 0;
+
+            keysContainer.innerHTML = '';
+
+            for (let i = 1; i <= 10; i++) {
+                const key = document.createElement("div");
+                key.classList.add("key");
+                key.innerText = i;
+                key.dataset.value = i;
+                key.dataset.setId = setId;
+                key.dataset.active = "false";
+                key.dataset.position = "0";
+                key.dataset.group = "-1";
+
+                key.addEventListener('click', function() {
+                    if (gameMode) {
+                        const setId = this.closest('.counting-set').id;
+                        const operationBtn = document.querySelector(`#${setId} .operation-btn.active`);
+                        const setOperation = operationBtn ? operationBtn.dataset.operation : '+';
+                        let correctAnswer;
+                        
+                        if (setOperation === '+') {
+                            correctAnswer = dice1Value + dice2Value;
+                        } else {
+                            correctAnswer = Math.abs(dice1Value - dice2Value);
+                        }
+                        
+                        if (parseInt(this.dataset.value) === correctAnswer) {
+                            // Mark this key as answered
+                            this.classList.add('answered');
+                            currentProblemAnswers[setId] = correctAnswer;
+                            
+                            // Check if all sets have answered
+                            const allSetsAnswered = Array.from(document.querySelectorAll('.counting-set')).every(set => {
+                                return currentProblemAnswers[set.id];
+                            });
+                            
+                            if (allSetsAnswered) {
+                                // Mark all answered keys as completed
+                                Object.keys(currentProblemAnswers).forEach(setId => {
+                                    const val = currentProblemAnswers[setId];
+                                    document.querySelector(`#${setId} .key.answered[data-value="${val}"]`).classList.add('completed');
+                                    
+                                    if (!completedNumbers.includes(val)) {
+                                        completedNumbers.push(val);
+                                        updateGameProgress();
+                                        
+                                        if (completedNumbers.length === 10) {
+                                            setTimeout(() => {
+                                                alert("Congratulations! You've completed all numbers 1-10!");
+                                                resetAllKeys();
+                                            }, 500);
+                                            return;
+                                        }
+                                    }
+                                });
+                                
+                                // Roll new dice after short delay
+                                setTimeout(() => {
+                                    rollDice();
+                                }, 1000);
+                            }
+                            
+                            // Add celebration effect
+                            this.style.animation = "bounce 0.5s";
+                            setTimeout(() => {
+                                this.style.animation = "";
+                            }, 500);
+                        } else {
+                            // Incorrect answer feedback
+                            this.style.animation = "shake 0.5s";
+                            setTimeout(() => {
+                                this.style.animation = "";
+                            }, 500);
+                        }
+                        return;
+                    }
+
+                    let currentPosition = parseInt(this.dataset.position);
+                    
+                    if (operation === '+') {
+                        if (this.dataset.active === "false") {
+                            this.style.background = currentColor;
+                            this.dataset.active = "true";
+                            this.dataset.group = groupColorIndex;
+                            count++;
+                            this.dataset.position = currentPosition + 1;
+                            this.style.transform = `translateY(-${this.dataset.position * 5}px)`;
+                            this.style.boxShadow = 'inset 0 0 10px rgba(0,0,0,0.3)';
+                            
+                            this.style.animation = "bounce 0.5s";
+                            setTimeout(() => {
+                                this.style.animation = "";
+                            }, 500);
+                        }
+                    } else {
+                        if (this.dataset.active === "true") {
+                            count--;
+                            this.dataset.position = Math.max(0, currentPosition - 1);
+                            this.style.transform = `translateY(-${this.dataset.position * 5}px)`;
+                            if (this.dataset.position == 0) {
+                                this.style.background = "#FFD700";
+                                this.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
+                                this.dataset.active = "false";
+                                this.dataset.group = "-1";
+                            }
+                            
+                            this.style.animation = "shake 0.5s";
+                            setTimeout(() => {
+                                this.style.animation = "";
+                            }, 500);
+                        }
+                    }
+                    totalDisplay.innerText = count;
+                    totalDisplay.parentElement.style.visibility = "hidden";
+                });
+
+                key.addEventListener('mouseenter', function() {
+                    if (this.dataset.active === "false") {
+                        this.style.transform = `translateY(-${this.dataset.position * 5}px) scale(1.05)`;
+                    }
+                });
+                
+                key.addEventListener('mouseleave', function() {
+                    if (this.dataset.active === "false") {
+                        this.style.transform = `translateY(-${this.dataset.position * 5}px) scale(1)`;
+                    }
+                });
+
+                keysContainer.appendChild(key);
+            }
+        }
+
+        function updateGameProgress() {
+            document.getElementById("gameProgress").textContent = 
+                `Completed: ${completedNumbers.length}/10`;
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'a' || e.key === 'A') {
+                setOperation('+');
+            } else if (e.key === 's' || e.key === 'S') {
+                setOperation('-');
+            } else if (e.key === 'r' || e.key === 'R') {
+                resetAllKeys();
+            } else if (e.key === 'g' || e.key === 'G') {
+                toggleGameMode();
+            }
+        });
+
+        // Initialize first set
+        createCountingSet("set1");
+    </script>
+</body>
+</html>
